@@ -1,8 +1,15 @@
-import React, { Fragment, Component } from 'react';
+import React, { Fragment } from 'react';
 
-export default class Instagram extends Component {
+export interface Props {
+  number: number;
+}
+
+interface State {
+  photos: Array<Object>;
+}
+
+export default class Instagram extends React.Component<Props, State> {
   state = {
-    width: this.windowGlobal,
     photos: []
   };
 
@@ -10,7 +17,9 @@ export default class Instagram extends Component {
     // need instagram token
 
     const res = fetch(
-      `https://api.instagram.com/v1/users/self/media/recent/?access_token=1084132.d703c80.678e50a84eae49918707739832ac003c`
+      `https://api.instagram.com/v1/users/self/media/recent/?access_token=${
+        process.env.ACCESS_TOKEN
+      }`
     )
       .then(res => res.json())
       .then(photos =>
@@ -18,44 +27,22 @@ export default class Instagram extends Component {
           photos: photos.data
         })
       );
-    window.addEventListener('resize', this.handleWindowSizeChange);
   }
 
-  handleWindowSizeChange = () => {
-    const windowGlobal = typeof window !== 'undefined' && window.innerWidth;
-    this.setState({ width: windowGlobal });
-  };
-
   render() {
-    const { width } = this.state;
-    const isMobile = width <= 700;
-
     const { photos } = this.state;
+    const { number } = this.props;
 
-    if (isMobile) {
-      return photos.slice(0, 6).map(photo => (
-        <Fragment key={photo.caption.id}>
-          <a href={photo.link} target="_blank">
-            <img
-              className="insta-image"
-              src={photo.images.standard_resolution.url}
-              alt="insta-image"
-            />
-          </a>
-        </Fragment>
-      ));
-    } else {
-      return photos.slice(0, 8).map(photo => (
-        <Fragment key={photo.caption.id}>
-          <a href={photo.link} target="_blank">
-            <img
-              className="insta-image"
-              src={photo.images.standard_resolution.url}
-              alt="insta-image"
-            />
-          </a>
-        </Fragment>
-      ));
-    }
+    return photos.slice(0, number).map(photo => (
+      <Fragment key={photo.caption.id}>
+        <a href={photo.link} target="_blank">
+          <img
+            className="insta-image"
+            src={photo.images.standard_resolution.url}
+            alt="insta-image"
+          />
+        </a>
+      </Fragment>
+    ));
   }
 }
